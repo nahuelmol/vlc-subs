@@ -10,8 +10,10 @@ function descriptor()
 end
 
 function activate()
-    dlg = vlc.dialog("hellow")
-    dlg:add_label("hellow from VLC", 1, 1, 1, 1)
+    local dlg = vlc.dialog("Assitant")
+    dlg:add_label("Hellow from VLC", 1, 1, 1, 1)
+    --local input_wgt = dlg:add_text_input("This is a Text Box", ...)
+    dlg:show()
 end
 
 function deactivate()
