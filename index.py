@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 def start():
     load_dotenv()
-    src = "myplugin.lua"
+    src = "main.lua"
     dest = os.getenv("DEST")
     dest_path = os.path.join(dest, os.path.basename(src))
 
