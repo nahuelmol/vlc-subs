@@ -1,3 +1,4 @@
+flag = false
 function descriptor()
     return {
         title = "hello",
@@ -19,6 +20,9 @@ function activate()
     dd:add_value(2, "Option B")
     dd:add_value(3, "Option C")
 
+    subtitle_path = nil
+    get_data()
+
     btn = dlg:add_button("Took", get_time, 1, 5, 1, 1)
     lbl = dlg:add_label("00:00:00", 1, 6, 1, 1)
     btn2 = dlg:add_button("Check", get_data, 1, 7, 1, 1)
@@ -33,28 +37,27 @@ function activate()
     dlg:show()
 end
 
-
 function get_data()
     local item = vlc.input.item()
-    if item == nil then
-        vlc.msg.info("item is nil")
-    else
-        local metas = item:metas()
+    if item ~= nil then
         local uri   = item:uri()
-        if metas ~= nil then
-            vlc.msg.info("Videofile: " .. metas["filename"])
-        end 
         if uri ~= nil then
             local decoded = vlc.strings.decode_uri(uri)
-            local path, filename = decoded:match("^file:///(.+/)(.+%..+)$")
-            vlc.msg.info("path: " .. path)
+            local dirpath, filename = decoded:match("^file:///(.+/)(.+%..+)$")
+            local j = (#filename - 4)
+            local just_name = string.sub(filename, 1, j)
+            local subpath = dirpath..just_name..".srt"
+            vlc.msg.info("subpath: ".. subpath)
+            local f = io.open(subpath, "r")
+            if not f then
+                vlc.msg.err("file cannot be opened")
+            else
+                subtitle_path = subpath
+                vlc.msg.info("file is open")
+            end
         end
-    end
-    local spu = vlc.input.get_spu_tracks()
-    if spu ~= nil then
-        vlc.msg.info("spu exists")
     else
-        vlc.msg.info("spu is nil")
+        vlc.msg.info("item is nil")
     end
 end
 
@@ -73,6 +76,41 @@ function get_time()
     local newt = t / 1000000
     result = convert(newt)
     lbl:set_text(result)
+
+    local f = io.open(subtitle_path, "r")
+    local r_hor = string.sub(result, 1, 2)
+    local r_min = string.sub(result, 4, 5)
+    local r_sec = string.sub(result, 7, 8)
+
+    local nline = 1
+    for line in f:lines() do
+        local ini_hor = string.sub(line, 1, 2)
+        local ini_min = string.sub(line, 4, 5)
+        local ini_sec = string.sub(line, 7, 12)
+        
+        local end_hor = string.sub(line, 18, 19)
+        local end_min = string.sub(line, 20, 21)
+        local end_sec = string.sub(line, 23, 28)
+
+        --if flag == true then
+        --    vlc.msg.info(line)
+        --    flag = false
+        --end
+        if targetline == nline then
+            vlc.msg.info(line)
+            flag = false
+        end
+        if r_hor >= ini_hor and r_hor <= end_hor then
+            if r_min >= ini_min and r_min <= end_min then
+                if r_sec >= ini_sec and r_sec <= end_sec then
+                    vlc.msg.info("found!")
+                    flag = true
+                    targetline = nline + 1
+                end
+            end
+        end
+        nline = nline + 1
+    end
 end
 
 function deactivate()
