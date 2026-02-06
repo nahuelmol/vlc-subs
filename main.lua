@@ -30,7 +30,7 @@ function activate()
     dlg:add_label(" ", 1, 8, 1, 1)
     dlg:add_label(" ", 1, 9, 1, 1)
     dlg:add_label(" ", 1, 10, 1, 1)
-    line = dlg:add_text_input("current line", 1, 11, 1, 1)
+    line = dlg:add_label("current line", 1, 11, 1, 1)
     dlg:add_label(" ", 1, 12, 1, 1)
     dlg:add_label(" ", 1, 13, 1, 1)
     dlg:add_label(" ", 1, 14, 1, 1)
@@ -47,13 +47,13 @@ function get_data()
             local j = (#filename - 4)
             local just_name = string.sub(filename, 1, j)
             local subpath = dirpath..just_name..".srt"
-            vlc.msg.info("subpath: ".. subpath)
+            --vlc.msg.info("subpath: ".. subpath)
             local f = io.open(subpath, "r")
             if not f then
                 vlc.msg.err("file cannot be opened")
             else
                 subtitle_path = subpath
-                vlc.msg.info("file is open")
+                vlc.msg.info("file open")
             end
         end
     else
@@ -69,6 +69,11 @@ function convert(seconds_to_convert)
     return string.format("%02d:%02d:%02d", hours, minutes, seconds)
 end
 
+function displayer(text)
+    line:set_text(text)
+    vlc.osd.message("found", 1, center)
+end
+
 function get_time()
     local input_time = vlc.object.input()
     if not input_time then return end
@@ -78,38 +83,51 @@ function get_time()
     lbl:set_text(result)
 
     local f = io.open(subtitle_path, "r")
-    local r_hor = string.sub(result, 1, 2)
-    local r_min = string.sub(result, 4, 5)
-    local r_sec = string.sub(result, 7, 8)
+    local r_hor = tonumber(string.sub(result, 1, 2))
+    local r_min = tonumber(string.sub(result, 4, 5))
+    local r_sec = tonumber(string.sub(result, 7, 8))
 
-    local nline = 1
+    local dialog = ""
     for line in f:lines() do
-        local ini_hor = string.sub(line, 1, 2)
-        local ini_min = string.sub(line, 4, 5)
-        local ini_sec = string.sub(line, 7, 12)
-        
-        local end_hor = string.sub(line, 18, 19)
-        local end_min = string.sub(line, 20, 21)
-        local end_sec = string.sub(line, 23, 28)
-
-        --if flag == true then
-        --    vlc.msg.info(line)
-        --    flag = false
-        --end
-        if targetline == nline then
-            vlc.msg.info(line)
-            flag = false
+        if flag == true then
+            if line == "" then
+                flag = false
+                --vlc.msg.info(dialog)
+                displayer(dialog)
+                dialog = ""
+            else
+                dialog = dialog.."~"..line
+            end
         end
-        if r_hor >= ini_hor and r_hor <= end_hor then
-            if r_min >= ini_min and r_min <= end_min then
-                if r_sec >= ini_sec and r_sec <= end_sec then
-                    vlc.msg.info("found!")
-                    flag = true
-                    targetline = nline + 1
+        if line:find("-->", 1, true) then
+            local ini_hor = string.sub(line, 1, 2)
+            local ini_min = string.sub(line, 4, 5)
+            local ini_sec = string.gsub(string.sub(line, 7, 12), ",", ".")
+            
+            local end_hor = string.sub(line, 18, 19)
+            local end_min = string.sub(line, 21, 22)
+            local end_sec = string.gsub(string.sub(line, 24, 29), ",", ".")
+
+            if r_hor >= tonumber(ini_hor) and r_hor <= tonumber(end_hor) then
+                if r_min >= tonumber(ini_min) and r_min <= tonumber(end_min) then
+                    if r_sec >= tonumber(ini_sec) and r_sec <= tonumber(end_sec) then
+                        vlc.msg.info("found!")
+                        flag = true
+                    end
                 end
             end
         end
-        nline = nline + 1
+        --[[
+        if line == "" and flag == true then
+            flag = false
+        end
+        vlc.msg.info("hor ini:"..ini_hor)
+        vlc.msg.info("hor end:"..end_hor)
+        vlc.msg.info("min ini:"..ini_min)
+        vlc.msg.info("min end:"..end_min)
+        vlc.msg.info("sec ini:"..ini_sec)
+        vlc.msg.info("sec end:"..end_sec)
+        ]]
     end
 end
 
