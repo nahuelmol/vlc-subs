@@ -1,3 +1,4 @@
+local json = require("dkjson")
 flag = false
 function descriptor()
     return {
@@ -34,7 +35,43 @@ function activate()
     dlg:add_label(" ", 1, 12, 1, 1)
     dlg:add_label(" ", 1, 13, 1, 1)
     dlg:add_label(" ", 1, 14, 1, 1)
+    text_input = dlg:add_text_input("empty", 1, 15, 1, 1)
+    dlg:add_button("Go", kanji_taker, 1, 16, 1, 1)
     dlg:show()
+end
+
+function http_get(url)
+    local stream = vlc.stream(url)
+    if not stream then
+        return nil, "strean failed"
+    end
+    local data = ""
+    while true do
+        local chunk = stream:read(1024)
+        if not chunk or #chunk == 0 then break end
+        data = data..chunk
+    end
+    return data
+end
+
+function kanji_taker()
+    local kanji = text_input:get_text()
+    local url = "https://kanjiapi.dev/v1/kanji/"..kanji
+    local body, err = http_get(url)
+    if body then
+        vlc.msg.info(body)
+        local obj, pos, err = json.decode(body, 1, nil)
+        if err then
+            vlc.msg.err("JSON err:" .. err)
+        else
+            local meanings = table.concat(obj["meanings"], ",")
+            local hiragana = table.concat(obj["kun_readings"], ",")
+            vlc.msg.info(meanings)
+            vlc.msg.info(hiragana)
+        end
+    else
+        vlc.msg.err("err:"..err)
+    end
 end
 
 function get_data()
