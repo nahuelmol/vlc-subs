@@ -7,11 +7,17 @@
 
 ### Goal
 
-This applicaction is an extension for VLC created with the purpose of agilizing the language learning. The idea is to a build a tool that controls subtitles corresponding to the video being played by VLC. Following, take into account that it was originally built for japanese.
+This applicaction is an extension for VLC created with the purpose of agilizing the language learning. The idea is to a build a tool that controls subtitles corresponding to the video being played by VLC. Take into account that this is meant for japanese learning.
 
 I'am looking for:
 
-* integation with an online dictionary
-* navigation between words that compounds the current lyric
-* flashcards creation that saves words and sentences (like an entire dialog line)
-* ciclic playing of phrases or something like that
+* integation with an online dictionary through an API
+* navigation between words that compounds the current caption
+* flashcards creation for saving words and sentences as examples (for adding context to the word being studied)
+* ciclic playing of phrases (or something like that)
+
+### API
+The is to text different alternatives for example:
+* kanjiapi (https://kanjiapi.dev/) **(proven, working)**
+* JLPT Vocabulary API
+* Jisho
