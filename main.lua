@@ -31,12 +31,16 @@ function activate()
     dlg:add_label(" ", 1, 8, 1, 1)
     dlg:add_label(" ", 1, 9, 1, 1)
     dlg:add_label(" ", 1, 10, 1, 1)
-    line = dlg:add_label("current line", 1, 11, 1, 1)
+    line = dlg:add_text_input("current line", 1, 11, 1, 1)
     dlg:add_label(" ", 1, 12, 1, 1)
     dlg:add_label(" ", 1, 13, 1, 1)
     dlg:add_label(" ", 1, 14, 1, 1)
     text_input = dlg:add_text_input("empty", 1, 15, 1, 1)
     dlg:add_button("Go", kanji_taker, 1, 16, 1, 1)
+    dlg:add_label("Meanings:", 1, 17, 1, 1)
+    meanings = dlg:add_label(" ", 1, 18, 1, 1)
+    dlg:add_label("Readings:", 1, 19, 1, 1)
+    readings = dlg:add_label(" ", 1, 20, 1, 1)
     dlg:show()
 end
 
@@ -66,8 +70,8 @@ function kanji_taker()
         else
             local meanings = table.concat(obj["meanings"], ",")
             local hiragana = table.concat(obj["kun_readings"], ",")
-            vlc.msg.info(meanings)
-            vlc.msg.info(hiragana)
+            readings:set_text(hiragana)
+            meanings:set_text(meanings)
         end
     else
         vlc.msg.err("err:"..err)
@@ -99,11 +103,13 @@ function get_data()
 end
 
 function convert(seconds_to_convert)
-    local hours = math.floor(seconds_to_convert / 3600)
-    local minutes = math.floor((seconds_to_convert % 3600) / 60)
-    local seconds = math.floor((seconds_to_convert % 60))
+    local hours     = math.floor(seconds_to_convert / 3600)
+    local minutes   = math.floor((seconds_to_convert % 3600) / 60)
+    local seconds   = seconds_to_convert - (minutes * 60) - (hours * 3600)
+    --local seconds = math.floor((seconds_to_convert % 60))
+    local seconds   = string.sub(seconds, 1, 6)
 
-    return string.format("%02d:%02d:%02d", hours, minutes, seconds)
+    return string.format("%02d:%02d:%02f", hours, minutes, seconds)
 end
 
 function displayer(text)
@@ -122,7 +128,9 @@ function get_time()
     local f = io.open(subtitle_path, "r")
     local r_hor = tonumber(string.sub(result, 1, 2))
     local r_min = tonumber(string.sub(result, 4, 5))
-    local r_sec = tonumber(string.sub(result, 7, 8))
+    local secs  = string.gsub(string.sub(result, 7, 12), ",", ".")
+    local r_sec = tonumber(secs)
+    vlc.msg.info("seconds:"..secs)
 
     local dialog = ""
     for line in f:lines() do
