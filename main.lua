@@ -1,5 +1,9 @@
 local json = require("dkjson")
 flag = false
+
+init = ''
+endi = ''
+
 function descriptor()
     return {
         title = "hello",
@@ -13,13 +17,13 @@ end
 
 function activate()
     dlg = vlc.dialog("Assitant")
-    msg = dlg:add_label("Hellow from VLC", 1, 1, 1, 1)
+    msg = dlg:add_label("Choose dictionary", 1, 1, 1, 1)
     dlg:add_label(" ", 1, 2, 1, 1)
     dlg:add_label(" ", 1, 3, 1, 1)
     dd = dlg:add_dropdown(1,2)
-    dd:add_value(1, "Option A")
-    dd:add_value(2, "Option B")
-    dd:add_value(3, "Option C")
+    dd:add_value("Kanjiapi", "Option A")
+    dd:add_value("Jisho", "Option B")
+    dd:add_value("Jpdb", "Option C")
 
     subtitle_path = nil
     get_data()
@@ -27,9 +31,9 @@ function activate()
     btn = dlg:add_button("Took", get_time, 1, 5, 1, 1)
     lbl = dlg:add_label("00:00:00", 1, 6, 1, 1)
     btn2 = dlg:add_button("Check", get_data, 1, 7, 1, 1)
+    replay_btn = dlg:add_button("Replay", replay, 1, 8, 1, 1)
+    play_btn = dlg:add_button("Play", play, 1, 9, 1, 1)
 
-    dlg:add_label(" ", 1, 8, 1, 1)
-    dlg:add_label(" ", 1, 9, 1, 1)
     dlg:add_label(" ", 1, 10, 1, 1)
     line = dlg:add_text_input("current line", 1, 11, 1, 1)
     dlg:add_label(" ", 1, 12, 1, 1)
@@ -42,6 +46,40 @@ function activate()
     dlg:add_label("Readings:", 1, 19, 1, 1)
     readings = dlg:add_label(" ", 1, 20, 1, 1)
     dlg:show()
+end
+
+function replay()
+    local ini_hor = string.sub(init, 1, 2)
+    local ini_min = string.sub(init, 4, 5)
+    local ini_sec = string.gsub(string.sub(init, 7, 12), ",", ".")
+    
+    local end_hor = string.sub(endi, 1, 2)
+    local end_min = string.sub(endi, 4, 5)
+    local end_sec = string.gsub(string.sub(endi, 7, 12), ",", ".")
+
+    ini_seconds = (3600 * ini_hor) + (60 * ini_min) + ini_sec
+    end_seconds = (3600 * end_hor) + (60 * end_min) + end_sec
+
+    new_ini_seconds = tostring(ini_seconds)
+    --secs  = string.gsub(new_ini_seconds, ".", ",")
+    vlc.msg.info("-> "..new_ini_seconds)
+
+    local input = vlc.object.input()
+    vlc.var.set(input, "time", 406.155)
+    if not input then
+        vlc.msg.err("ERR")
+        return
+    end
+    vlc.playlist.play()
+    --[[
+    if vlc.playlist.status() == "stopped" then
+        vlc.playlist.play()
+    end
+    ]]
+end
+
+function play()
+    vlc.msg.info("just playing")
 end
 
 function http_get(url)
@@ -88,7 +126,6 @@ function get_data()
             local j = (#filename - 4)
             local just_name = string.sub(filename, 1, j)
             local subpath = dirpath..just_name..".srt"
-            --vlc.msg.info("subpath: ".. subpath)
             local f = io.open(subpath, "r")
             if not f then
                 vlc.msg.err("file cannot be opened")
@@ -156,23 +193,17 @@ function get_time()
             if r_hor >= tonumber(ini_hor) and r_hor <= tonumber(end_hor) then
                 if r_min >= tonumber(ini_min) and r_min <= tonumber(end_min) then
                     if r_sec >= tonumber(ini_sec) and r_sec <= tonumber(end_sec) then
+                        init = string.sub(line, 1, 12)
+                        endi = string.sub(line, 18, 29)
+                        if vlc.playlist.status() == "playing" then
+                            vlc.playlist.pause()
+                        end
                         vlc.msg.info("found!")
                         flag = true
                     end
                 end
             end
         end
-        --[[
-        if line == "" and flag == true then
-            flag = false
-        end
-        vlc.msg.info("hor ini:"..ini_hor)
-        vlc.msg.info("hor end:"..end_hor)
-        vlc.msg.info("min ini:"..ini_min)
-        vlc.msg.info("min end:"..end_min)
-        vlc.msg.info("sec ini:"..ini_sec)
-        vlc.msg.info("sec end:"..end_sec)
-        ]]
     end
 end
 
