@@ -20,10 +20,11 @@ function activate()
     msg = dlg:add_label("Choose dictionary", 1, 1, 1, 1)
     dlg:add_label(" ", 1, 2, 1, 1)
     dlg:add_label(" ", 1, 3, 1, 1)
+
     dd = dlg:add_dropdown(1,2)
-    dd:add_value("Kanjiapi", "Option A")
-    dd:add_value("Jisho", "Option B")
-    dd:add_value("Jpdb", "Option C")
+    kanjiapi = dd:add_value("Kanjiapi", "Option A")
+    jisho = dd:add_value("Jisho", "Option B")
+    jpdb = dd:add_value("Jpdb", "Option C")
 
     subtitle_path = nil
     get_data()
@@ -72,20 +73,19 @@ function replay()
     end
     vlc.playlist.play()
     --[[
-    if vlc.playlist.status() == "stopped" then
-        vlc.playlist.play()
-    end
     ]]
 end
 
 function play()
-    vlc.msg.info("just playing")
+    if vlc.playlist.status() == "stopped" then
+        vlc.playlist.play()
+    end
 end
 
 function http_get(url)
     local stream = vlc.stream(url)
     if not stream then
-        return nil, "strean failed"
+        return nil, "stream failed"
     end
     local data = ""
     while true do
@@ -97,8 +97,24 @@ function http_get(url)
 end
 
 function kanji_taker()
+    opc = dd:get_text()
+    vlc.msg.info(opc)
     local kanji = text_input:get_text()
-    local url = "https://kanjiapi.dev/v1/kanji/"..kanji
+
+    local url = ''
+    if opc == "Kanjiapi" then
+        url = "https://kanjiapi.dev/v1/kanji/"..kanji
+    elseif opc == "Jisho" then
+        url = "https://jisho/"..kanji
+    elseif opc == "Jpdb" then
+        url = "htpps://jpdb.io/"..kanji
+    else
+        url = nil
+        readings:set_text("not api selected")
+        meanings:set_text("not api selected")
+    end
+        
+    
     local body, err = http_get(url)
     if body then
         vlc.msg.info(body)
@@ -108,6 +124,7 @@ function kanji_taker()
         else
             local meanings = table.concat(obj["meanings"], ",")
             local hiragana = table.concat(obj["kun_readings"], ",")
+            --vlc.msg.info(obs["meanings"])
             readings:set_text(hiragana)
             meanings:set_text(meanings)
         end
