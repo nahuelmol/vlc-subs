@@ -18,16 +18,18 @@ end
 function activate()
     dlg = vlc.dialog("Assitant")
     msg = dlg:add_label("Choose dictionary", 1, 1, 1, 1)
-    dlg:add_label(" ", 1, 2, 1, 1)
-    dlg:add_label(" ", 1, 3, 1, 1)
 
-    dd = dlg:add_dropdown(1,2)
+    dd = dlg:add_dropdown(1,3)
     kanjiapi = dd:add_value("Kanjiapi", "Option A")
     jisho = dd:add_value("Jisho", "Option B")
     jpdb = dd:add_value("Jpdb", "Option C")
 
     subtitle_path = nil
-    get_data()
+    get_sub()
+
+    --lang = dlg:add_dropdwon(1,2)
+    --lang:add_value("Japanese", "Option A")
+    --lang:add_value("Korean", "Option B")
 
     btn = dlg:add_button("Took", get_time, 1, 5, 1, 1)
     lbl = dlg:add_label("00:00:00", 1, 6, 1, 1)
@@ -98,20 +100,32 @@ end
 
 function kanji_taker()
     opc = dd:get_text()
+    language = lang:get_text()
     vlc.msg.info(opc)
     local kanji = text_input:get_text()
 
     local url = ''
-    if opc == "Kanjiapi" then
-        url = "https://kanjiapi.dev/v1/kanji/"..kanji
-    elseif opc == "Jisho" then
-        url = "https://jisho/"..kanji
-    elseif opc == "Jpdb" then
-        url = "htpps://jpdb.io/"..kanji
+    if language == 'Japanese' then
+        if opc == "Kanjiapi" then
+            url = "https://kanjiapi.dev/v1/kanji/"..kanji
+        elseif opc == "Jisho" then
+            url = "https://jisho/"..kanji
+        elseif opc == "Jpdb" then
+            url = "htpps://jpdb.io/"..kanji
+        else
+            url = nil
+            readings:set_text("not api selected")
+            meanings:set_text("not api selected")
+        end
+    elseif language == 'Korean' then
+        if opc == "" then
+            url = ""..kanji
+        else
+        end
     else
         url = nil
-        readings:set_text("not api selected")
-        meanings:set_text("not api selected")
+        readings:set_text("not lang selected")
+        meanings:set_text("not lang selected")
     end
         
     
@@ -133,7 +147,7 @@ function kanji_taker()
     end
 end
 
-function get_data()
+function get_sub()
     local item = vlc.input.item()
     if item ~= nil then
         local uri   = item:uri()
