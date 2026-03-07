@@ -19,17 +19,23 @@ function activate()
     dlg = vlc.dialog("Assitant")
     msg = dlg:add_label("Choose dictionary", 1, 1, 1, 1)
 
-    dd = dlg:add_dropdown(1,3)
-    kanjiapi = dd:add_value("Kanjiapi", "Option A")
-    jisho = dd:add_value("Jisho", "Option B")
-    jpdb = dd:add_value("Jpdb", "Option C")
+    lang = dlg:add_dropdown(1, 2)
+    lang:add_value("Japanese", "Option A")
+    lang:add_value("Korean", "Option B")
+    dlg:add_label(" ", 1, 3, 1, 1)
+
+    dd = dlg:add_dropdown(1, 4)
+    language = lang:get_text()
+    if language == "Japanese" then
+        kanjiapi = dd:add_value("Kanjiapi", "Option A")
+        jisho = dd:add_value("Jisho", "Option B")
+        jpdb = dd:add_value("Jpdb", "Option C")
+    elseif language == "Korean" then
+        kanjiapi = dd:add_value("Opendict", "Option A")
+    end
 
     subtitle_path = nil
     get_sub()
-
-    --lang = dlg:add_dropdwon(1,2)
-    --lang:add_value("Japanese", "Option A")
-    --lang:add_value("Korean", "Option B")
 
     btn = dlg:add_button("Took", get_time, 1, 5, 1, 1)
     lbl = dlg:add_label("00:00:00", 1, 6, 1, 1)
@@ -118,9 +124,12 @@ function kanji_taker()
             meanings:set_text("not api selected")
         end
     elseif language == 'Korean' then
-        if opc == "" then
-            url = ""..kanji
+        if opc == "Opendict" then
+            url = "https://opendict.korean.go.kr/api/search?key={}&q={}"..kanji
         else
+            url = nil
+            readings:set_text("not api selected")
+            meanings:set_text("not api selected")
         end
     else
         url = nil
