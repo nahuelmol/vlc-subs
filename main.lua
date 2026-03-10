@@ -16,24 +16,15 @@ function descriptor()
 end
 
 function activate()
-    dlg = vlc.dialog("Assitant")
+    dlg = vlc.dialog("Assistant")
     msg = dlg:add_label("Choose dictionary", 1, 1, 1, 1)
 
     lang = dlg:add_dropdown(1, 2)
     lang:add_value("Japanese", "Option A")
-    lang:add_value("Korean", "Option B")
-    dlg:add_label(" ", 1, 3, 1, 1)
+    lang:add_value("Korean"  , "Option B")
+    read = dlg:add_button("read", reader, 2, 2, 1, 1)
 
     dd = dlg:add_dropdown(1, 4)
-    language = lang:get_text()
-    if language == "Japanese" then
-        kanjiapi = dd:add_value("Kanjiapi", "Option A")
-        jisho = dd:add_value("Jisho", "Option B")
-        jpdb = dd:add_value("Jpdb", "Option C")
-    elseif language == "Korean" then
-        kanjiapi = dd:add_value("Opendict", "Option A")
-    end
-
     subtitle_path = nil
     get_sub()
 
@@ -55,6 +46,18 @@ function activate()
     dlg:add_label("Readings:", 1, 19, 1, 1)
     readings = dlg:add_label(" ", 1, 20, 1, 1)
     dlg:show()
+end
+
+function reader()
+    language = lang:get_text()
+    vlc.msg.info("-> "..language)
+    if language == "Japanese" then
+        kanjiapi= dd:add_value("Kanjiapi", "Option A")
+        jisho   = dd:add_value("Jisho", "Option B")
+        jpdb    = dd:add_value("Jpdb", "Option C")
+    elseif language == "Korean" then
+        kanjiapi = dd:add_value("Opendict", "Option A")
+    end
 end
 
 function replay()
