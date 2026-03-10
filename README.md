@@ -7,7 +7,7 @@
 
 ### Goal
 
-This applicaction is an extension for VLC created with the purpose of agilizing the language learning. The idea is to a build a tool that controls subtitles corresponding to the video being played by VLC. Take into account that this is meant for japanese learning.
+This applicaction is an extension for VLC created with the purpose of agilizing the language learning. The idea is to a build a tool that controls subtitles corresponding to the video being played by VLC. Take into account that this is meant for japanese learning and also for korean language learning.
 
 I'am looking for:
 
@@ -16,8 +16,15 @@ I'am looking for:
 * flashcards creation for saving words and sentences as examples (for adding context to the word being studied)
 * ciclic playing of phrases (or something like that)
 
-### API
-The is to text different alternatives for example:
+### APIs
+
+The idea is to test different alternatives for japanese that do not use key tokens:
 * kanjiapi (https://kanjiapi.dev/) **(proven, working)**
 * JLPT Vocabulary API
 * Jisho
+
+And also for korean, which APIs look like they were mostly implemented with tokens.
+* opendict
+* krdict (opendict is based on it)
+
+
