@@ -22,14 +22,20 @@ function activate()
     lang = dlg:add_dropdown(1, 2)
     lang:add_value("Japanese", "Option A")
     lang:add_value("Korean"  , "Option B")
-    read = dlg:add_button("read", reader, 2, 2, 1, 1)
+    read = dlg:add_button("read", update_api, 2, 2, 1, 1)
 
-    dd = dlg:add_dropdown(1, 4)
+    msg = dlg:add_label("Choose dictionary", 1, 3, 1, 1)
+    api = dlg:add_dropdown(1, 4)
+    kanjiapi= api:add_value("Kanjiapi", "Option A")
+    jisho   = api:add_value("Jisho", "Option B")
+    jpdb    = api:add_value("Jpdb", "Option C")
+
+    --update_api()
     subtitle_path = nil
     get_sub()
 
-    btn = dlg:add_button("Took", get_time, 1, 5, 1, 1)
-    lbl = dlg:add_label("00:00:00", 1, 6, 1, 1)
+    btn = dlg:add_button("Took", get_time, 1, 6, 1, 1)
+    lbl = dlg:add_label("00:00:00", 2, 6, 1, 1)
     btn2 = dlg:add_button("Check", get_data, 1, 7, 1, 1)
     replay_btn = dlg:add_button("Replay", replay, 1, 8, 1, 1)
     play_btn = dlg:add_button("Play", play, 1, 9, 1, 1)
@@ -48,16 +54,21 @@ function activate()
     dlg:show()
 end
 
-function reader()
+function update_api()
+    --vlc.msg.info("hello")
+    dlg:del_widget(api)
+    api = dlg:add_dropdown(1, 4)
     language = lang:get_text()
-    vlc.msg.info("-> "..language)
     if language == "Japanese" then
-        kanjiapi= dd:add_value("Kanjiapi", "Option A")
-        jisho   = dd:add_value("Jisho", "Option B")
-        jpdb    = dd:add_value("Jpdb", "Option C")
+        kanjiapi= api:add_value("Kanjiapi", "Option A")
+        jisho   = api:add_value("Jisho", "Option B")
+        jpdb    = api:add_value("Jpdb", "Option C")
     elseif language == "Korean" then
-        kanjiapi = dd:add_value("Opendict", "Option A")
+        kanjiapi = api:add_value("Opendict", "Option A")
     end
+    --[[
+    vlc.msg.info("-> "..language)
+    ]]
 end
 
 function replay()
@@ -83,8 +94,6 @@ function replay()
         return
     end
     vlc.playlist.play()
-    --[[
-    ]]
 end
 
 function play()
@@ -108,7 +117,7 @@ function http_get(url)
 end
 
 function kanji_taker()
-    opc = dd:get_text()
+    opc = api:get_text()
     language = lang:get_text()
     vlc.msg.info(opc)
     local kanji = text_input:get_text()
