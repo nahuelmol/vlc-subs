@@ -30,14 +30,14 @@ function activate()
     jisho   = api:add_value("Jisho", "Option B")
     jpdb    = api:add_value("Jpdb", "Option C")
 
-    --update_api()
     subtitle_path = nil
-    get_sub()
+    get_sub_file()
 
     btn = dlg:add_button("Took", get_time, 1, 6, 1, 1)
     lbl = dlg:add_label("00:00:00", 2, 6, 1, 1)
-    btn2 = dlg:add_button("Check", get_data, 1, 7, 1, 1)
-    replay_btn = dlg:add_button("Replay", replay, 1, 8, 1, 1)
+    --btn2 = dlg:add_button("Check", get_data, 1, 7, 1, 1)
+
+    repl_btn = dlg:add_button("Replay", replay, 1, 8, 1, 1)
     play_btn = dlg:add_button("Play", play, 1, 9, 1, 1)
 
     dlg:add_label(" ", 1, 10, 1, 1)
@@ -55,7 +55,6 @@ function activate()
 end
 
 function update_api()
-    --vlc.msg.info("hello")
     dlg:del_widget(api)
     api = dlg:add_dropdown(1, 4)
     language = lang:get_text()
@@ -67,7 +66,6 @@ function update_api()
         kanjiapi = api:add_value("Opendict", "Option A")
     end
     --[[
-    vlc.msg.info("-> "..language)
     ]]
 end
 
@@ -84,7 +82,6 @@ function replay()
     end_seconds = (3600 * end_hor) + (60 * end_min) + end_sec
 
     new_ini_seconds = tostring(ini_seconds)
-    --secs  = string.gsub(new_ini_seconds, ".", ",")
     vlc.msg.info("-> "..new_ini_seconds)
 
     local input = vlc.object.input()
@@ -127,9 +124,28 @@ function kanji_taker()
         if opc == "Kanjiapi" then
             url = "https://kanjiapi.dev/v1/kanji/"..kanji
         elseif opc == "Jisho" then
-            url = "https://jisho/"..kanji
+            url = "https://jisho.org/api/v1/search/words?keyword="..kanji
         elseif opc == "Jpdb" then
-            url = "htpps://jpdb.io/"..kanji
+            local request   = "POST"
+            local url       = "https://jpdb.io/api/v1/deck/add-vocabulary"
+            local JPDB_API_KEY = os.getenv("JPDB_API_KEY")
+            local header1   = 'Accept: application/json'
+            local header2   = 'Authorization: Bearer '..JPDB_API_KEY
+            local header3   = 'Content-Type: application/json'
+            local data      = '{
+                "id":0,
+                "vocabulary":[
+                    [
+                        0
+                    ]
+                ],
+                "occurences":[
+                    0
+                ],
+                "replace_existing_occurences": false,
+                "ignore_unknown": true
+            }'
+            --url = "htpps://jpdb.io/"..kanji
         else
             url = nil
             readings:set_text("not api selected")
@@ -168,7 +184,8 @@ function kanji_taker()
     end
 end
 
-function get_sub()
+function get_sub_file()
+    vlc.msg.info("file open")
     local item = vlc.input.item()
     if item ~= nil then
         local uri   = item:uri()
@@ -219,7 +236,7 @@ function get_time()
     local r_min = tonumber(string.sub(result, 4, 5))
     local secs  = string.gsub(string.sub(result, 7, 12), ",", ".")
     local r_sec = tonumber(secs)
-    vlc.msg.info("seconds:"..secs)
+    --vlc.msg.info("seconds:"..secs)
 
     local dialog = ""
     for line in f:lines() do
