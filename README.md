@@ -22,9 +22,10 @@ The idea is to test different alternatives for japanese that do not use key toke
 * kanjiapi (https://kanjiapi.dev/) **(proven, working)**
 * JLPT Vocabulary API
 * Jisho
+* Jpdb offers an alternative but it requires authentication tokens
 
 And also for korean, which APIs look like they were mostly implemented with tokens.
-* opendict
-* krdict (opendict is based on it)
+* Opendict
+* Krdict (opendict is based on it)
 
 
