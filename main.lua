@@ -62,6 +62,7 @@ function update_api()
         kanjiapi= api:add_value("Kanjiapi", "Option A")
         jisho   = api:add_value("Jisho", "Option B")
         jpdb    = api:add_value("Jpdb", "Option C")
+        jlptvoc = api:add_value("Jlpt", "Option D")
     elseif language == "Korean" then
         kanjiapi = api:add_value("Opendict", "Option A")
     end
@@ -125,6 +126,8 @@ function kanji_taker()
             url = "https://kanjiapi.dev/v1/kanji/"..kanji
         elseif opc == "Jisho" then
             url = "https://jisho.org/api/v1/search/words?keyword="..kanji
+        elseif opc == "Jlptvoc" then
+            url = "/api/words?word="..kanji
         elseif opc == "Jpdb" then
             local request   = "POST"
             local url       = "https://jpdb.io/api/v1/deck/add-vocabulary"
@@ -173,11 +176,99 @@ function kanji_taker()
         if err then
             vlc.msg.err("JSON err:" .. err)
         else
-            local meanings = table.concat(obj["meanings"], ",")
-            local hiragana = table.concat(obj["kun_readings"], ",")
-            --vlc.msg.info(obs["meanings"])
-            readings:set_text(hiragana)
-            meanings:set_text(meanings)
+            if opc == "" then
+                local meanings = table.concat(obj["meanings"], ",")
+                local hiragana = table.concat(obj["kun_readings"], ",")
+                readings:set_text(hiragana)
+                meanings:set_text(meanings)
+            elseif opc == "Jpdb" then
+                --local meanings = table.concat(obj["meanings"], ",")
+                --local hiragana = table.concat(obj["kun_readings"], ",")
+                readings:set_text(hiragana)
+                meanings:set_text(meanings)
+            elseif opc == "Jlptvoc" then
+                --[[
+                    {
+                      "total": 8385,
+                      "offset": 0,
+                      "limit": 10,
+                      "words": [
+                        {
+                          "word": "毎朝",
+                          "meaning": "every morning",
+                          "furigana": "まいあさ",
+                          "romaji": "maiasa",
+                          "level": 5
+                        },
+                        {
+                          "word": "問題",
+                          "meaning": "problem",
+                          "furigana": "もんだい",
+                          "romaji": "mondai",
+                          "level": 5
+                        },
+                        {
+                          "word": "お茶",
+                          "meaning": "green tea",
+                          "furigana": "おちゃ",
+                          "romaji": "ocha",
+                          "level": 5
+                        },
+                        {
+                          "word": "黒",
+                          "meaning": "black",
+                          "furigana": "くろ",
+                          "romaji": "kuro",
+                          "level": 5
+                        },
+                        {
+                          "word": "台所",
+                          "meaning": "kitchen",
+                          "furigana": "だいどころ",
+                          "romaji": "daidokoro",
+                          "level": 5
+                        },
+                        {
+                          "word": "葉書",
+                          "meaning": "postcard",
+                          "furigana": "はがき",
+                          "romaji": "hagaki",
+                          "level": 5
+                        },
+                        {
+                          "word": "ペン",
+                          "meaning": "pen",
+                          "furigana": "",
+                          "romaji": "pen",
+                          "level": 5
+                        },
+                        {
+                          "word": "ニュース",
+                          "meaning": "news",
+                          "furigana": "",
+                          "romaji": "nyūsu",
+                          "level": 5
+                        },
+                        {
+                          "word": "花瓶",
+                          "meaning": "a vase",
+                          "furigana": "かびん",
+                          "romaji": "kabin",
+                          "level": 5
+                        },
+                        {
+                          "word": "フォーク",
+                          "meaning": "fork",
+                          "furigana": "",
+                          "romaji": "fōku",
+                          "level": 5
+                        }
+                      ]
+                    }
+                ]]
+            elseif opc == "Jisho" then
+                --look at the file format
+            end
         end
     else
         vlc.msg.err("err:"..err)
@@ -218,9 +309,24 @@ function convert(seconds_to_convert)
     return string.format("%02d:%02d:%02f", hours, minutes, seconds)
 end
 
+function split_by_space(input_string)
+    local results = {}
+    for word in input_string:gmatch("%S+") do
+        table.insert(results, word)
+    end
+    return results
+end
+
 function displayer(text)
     line:set_text(text)
     vlc.osd.message("found", 1, center)
+    local current_language = lang:get_text()
+    if current_language == "Korean" then
+        words = split_by_space(text)
+        for key, value in pairs(words) do
+            print("Key: " .. tostring(key) .. ", Value: " .. tostring(value))
+        end
+    end
 end
 
 function get_time()
