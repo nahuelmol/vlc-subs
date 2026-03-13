@@ -29,6 +29,7 @@ function activate()
     kanjiapi= api:add_value("Kanjiapi", "Option A")
     jisho   = api:add_value("Jisho", "Option B")
     jpdb    = api:add_value("Jpdb", "Option C")
+    jlptvoc = api:add_value("Jlpt", "Option D")
 
     subtitle_path = nil
     get_sub_file()
@@ -83,7 +84,7 @@ function replay()
     end_seconds = (3600 * end_hor) + (60 * end_min) + end_sec
 
     new_ini_seconds = tostring(ini_seconds)
-    vlc.msg.info("-> "..new_ini_seconds)
+    --vlc.msg.info("-> "..new_ini_seconds)
 
     local input = vlc.object.input()
     vlc.var.set(input, "time", 406.155)
@@ -115,12 +116,12 @@ function http_get(url)
 end
 
 function kanji_taker()
-    opc = api:get_text()
+    opc      = api:get_text()
     language = lang:get_text()
     vlc.msg.info(opc)
     local kanji = text_input:get_text()
 
-    local url = ''
+    local url = nil
     if language == 'Japanese' then
         if opc == "Kanjiapi" then
             url = "https://kanjiapi.dev/v1/kanji/"..kanji
@@ -150,7 +151,6 @@ function kanji_taker()
             }'
             --url = "htpps://jpdb.io/"..kanji
         else
-            url = nil
             readings:set_text("not api selected")
             meanings:set_text("not api selected")
         end
@@ -158,25 +158,22 @@ function kanji_taker()
         if opc == "Opendict" then
             url = "https://opendict.korean.go.kr/api/search?key={}&q={}"..kanji
         else
-            url = nil
             readings:set_text("not api selected")
             meanings:set_text("not api selected")
         end
     else
-        url = nil
         readings:set_text("not lang selected")
         meanings:set_text("not lang selected")
     end
-        
     
     local body, err = http_get(url)
     if body then
-        vlc.msg.info(body)
-        local obj, pos, err = json.decode(body, 1, nil)
+        --vlc.msg.info(body)
         if err then
             vlc.msg.err("JSON err:" .. err)
         else
-            if opc == "" then
+            local obj, pos, err = json.decode(body, 1, nil)
+            if opc == "Kanjiapi" then
                 local meanings = table.concat(obj["meanings"], ",")
                 local hiragana = table.concat(obj["kun_readings"], ",")
                 readings:set_text(hiragana)
@@ -184,8 +181,10 @@ function kanji_taker()
             elseif opc == "Jpdb" then
                 --local meanings = table.concat(obj["meanings"], ",")
                 --local hiragana = table.concat(obj["kun_readings"], ",")
-                readings:set_text(hiragana)
-                meanings:set_text(meanings)
+                --readings:set_text(hiragana)
+                --meanings:set_text(meanings)
+                --look at the format in Jpdb
+                vlc.msg.info("info")
             elseif opc == "Jlptvoc" then
                 --[[
                     {
@@ -266,8 +265,10 @@ function kanji_taker()
                       ]
                     }
                 ]]
+                vlc.msg.info("info")
             elseif opc == "Jisho" then
-                --look at the file format
+                --look at the file format "jisho_data_format"
+                vlc.msg.info("info")
             end
         end
     else
