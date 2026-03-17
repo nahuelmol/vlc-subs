@@ -6,11 +6,11 @@ endi = ''
 
 function descriptor()
     return {
-        title = "hello",
+        title = "Hello",
         version = "1.0",
         author = "Nahuel",
         shortdesc = "First plugin",
-        description = "nothing to say",
+        description = "Nothing to say",
         capabilities = {}
     }
 end
@@ -22,10 +22,11 @@ function activate()
     lang = dlg:add_dropdown(1, 2)
     lang:add_value("Japanese", "Option A")
     lang:add_value("Korean"  , "Option B")
-    read = dlg:add_button("read", update_api, 2, 2, 1, 1)
 
+    read = dlg:add_button("Read", update_api, 2, 2, 1, 1)
     msg = dlg:add_label("Choose dictionary", 1, 3, 1, 1)
-    api = dlg:add_dropdown(1, 4)
+
+    api     = dlg:add_dropdown(1, 4)
     kanjiapi= api:add_value("Kanjiapi", "Option A")
     jisho   = api:add_value("Jisho", "Option B")
     jpdb    = api:add_value("Jpdb", "Option C")
@@ -37,7 +38,6 @@ function activate()
     btn = dlg:add_button("Took", get_time, 1, 6, 1, 1)
     lbl = dlg:add_label("00:00:00", 2, 6, 1, 1)
     --btn2 = dlg:add_button("Check", get_data, 1, 7, 1, 1)
-
     repl_btn = dlg:add_button("Replay", replay, 1, 8, 1, 1)
     play_btn = dlg:add_button("Play", play, 1, 9, 1, 1)
 
@@ -53,6 +53,8 @@ function activate()
     dlg:add_label("Readings:", 1, 19, 1, 1)
     readings = dlg:add_label(" ", 1, 20, 1, 1)
     dlg:show()
+    --[[
+    ]]
 end
 
 function update_api()
@@ -67,8 +69,6 @@ function update_api()
     elseif language == "Korean" then
         kanjiapi = api:add_value("Opendict", "Option A")
     end
-    --[[
-    ]]
 end
 
 function replay()
@@ -136,7 +136,9 @@ function kanji_taker()
             local header1   = 'Accept: application/json'
             local header2   = 'Authorization: Bearer '..JPDB_API_KEY
             local header3   = 'Content-Type: application/json'
-            local data      = '{
+            local data      = ''
+            --[[
+            '{
                 "id":0,
                 "vocabulary":[
                     [
@@ -149,7 +151,7 @@ function kanji_taker()
                 "replace_existing_occurences": false,
                 "ignore_unknown": true
             }'
-            --url = "htpps://jpdb.io/"..kanji
+            ]]
         else
             readings:set_text("not api selected")
             meanings:set_text("not api selected")
@@ -168,7 +170,6 @@ function kanji_taker()
     
     local body, err = http_get(url)
     if body then
-        --vlc.msg.info(body)
         if err then
             vlc.msg.err("JSON err:" .. err)
         else

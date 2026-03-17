@@ -1,0 +1,15 @@
+
+{
+    "id":0,
+    "vocabulary":[
+        [
+            0
+        ]
+    ],
+    "occurences":[
+        0
+    ],
+    "replace_existing_occurences": false,
+    "ignore_unknown": true
+}
+
