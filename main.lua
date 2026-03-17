@@ -118,6 +118,7 @@ end
 function kanji_taker()
     opc      = api:get_text()
     language = lang:get_text()
+    vlc.msg.info(language)
     vlc.msg.info(opc)
     local kanji = text_input:get_text()
 
@@ -127,8 +128,8 @@ function kanji_taker()
             url = "https://kanjiapi.dev/v1/kanji/"..kanji
         elseif opc == "Jisho" then
             url = "https://jisho.org/api/v1/search/words?keyword="..kanji
-        elseif opc == "Jlptvoc" then
-            url = "/api/words?word="..kanji
+        elseif opc == "Jlpt" then
+            url = "https://jlpt-vocab-api.vercel.app/api/words?word="..kanji
         elseif opc == "Jpdb" then
             local request   = "POST"
             local url       = "https://jpdb.io/api/v1/deck/add-vocabulary"
@@ -153,15 +154,15 @@ function kanji_taker()
             }'
             ]]
         else
-            readings:set_text("not api selected")
-            meanings:set_text("not api selected")
+            readings:set_text("Japanese:err api - not api selected")
+            meanings:set_text("Japanese:err api - not api selected")
         end
     elseif language == 'Korean' then
         if opc == "Opendict" then
             url = "https://opendict.korean.go.kr/api/search?key={}&q={}"..kanji
         else
-            readings:set_text("not api selected")
-            meanings:set_text("not api selected")
+            readings:set_text("Korean:err api - not api selected")
+            meanings:set_text("Korean:err api - not api selected")
         end
     else
         readings:set_text("not lang selected")
@@ -179,14 +180,15 @@ function kanji_taker()
                 local hiragana = table.concat(obj["kun_readings"], ",")
                 readings:set_text(hiragana)
                 meanings:set_text(meanings)
+                vlc.msg.info("done kanjiapi!")
             elseif opc == "Jpdb" then
                 --local meanings = table.concat(obj["meanings"], ",")
                 --local hiragana = table.concat(obj["kun_readings"], ",")
                 --readings:set_text(hiragana)
                 --meanings:set_text(meanings)
                 --look at the format in Jpdb
-                vlc.msg.info("info")
-            elseif opc == "Jlptvoc" then
+                vlc.msg.info("done JPDB!")
+            elseif opc == "Jlpt" then
                 --[[
                     {
                       "total": 8385,
@@ -199,77 +201,20 @@ function kanji_taker()
                           "furigana": "まいあさ",
                           "romaji": "maiasa",
                           "level": 5
-                        },
-                        {
-                          "word": "問題",
-                          "meaning": "problem",
-                          "furigana": "もんだい",
-                          "romaji": "mondai",
-                          "level": 5
-                        },
-                        {
-                          "word": "お茶",
-                          "meaning": "green tea",
-                          "furigana": "おちゃ",
-                          "romaji": "ocha",
-                          "level": 5
-                        },
-                        {
-                          "word": "黒",
-                          "meaning": "black",
-                          "furigana": "くろ",
-                          "romaji": "kuro",
-                          "level": 5
-                        },
-                        {
-                          "word": "台所",
-                          "meaning": "kitchen",
-                          "furigana": "だいどころ",
-                          "romaji": "daidokoro",
-                          "level": 5
-                        },
-                        {
-                          "word": "葉書",
-                          "meaning": "postcard",
-                          "furigana": "はがき",
-                          "romaji": "hagaki",
-                          "level": 5
-                        },
-                        {
-                          "word": "ペン",
-                          "meaning": "pen",
-                          "furigana": "",
-                          "romaji": "pen",
-                          "level": 5
-                        },
-                        {
-                          "word": "ニュース",
-                          "meaning": "news",
-                          "furigana": "",
-                          "romaji": "nyūsu",
-                          "level": 5
-                        },
-                        {
-                          "word": "花瓶",
-                          "meaning": "a vase",
-                          "furigana": "かびん",
-                          "romaji": "kabin",
-                          "level": 5
-                        },
-                        {
-                          "word": "フォーク",
-                          "meaning": "fork",
-                          "furigana": "",
-                          "romaji": "fōku",
-                          "level": 5
                         }
                       ]
                     }
                 ]]
-                vlc.msg.info("info")
+                vlc.msg.info("trying Jlpt!")
+                vlc.msg.info(obj)
+                local meanings = obj["words"]["meaning"]
+                local furigana = obj["words"]["furigana"]
+                readings:set_text(furigana)
+                meanings:set_text(meanings)
+                vlc.msg.info("done Jlpt!")
             elseif opc == "Jisho" then
                 --look at the file format "jisho_data_format"
-                vlc.msg.info("info")
+                vlc.msg.info("done Jisho!")
             end
         end
     else
@@ -339,6 +284,7 @@ function get_time()
     result = convert(newt)
     lbl:set_text(result)
 
+    vlc.msg.info(subtitle_path)
     local f = io.open(subtitle_path, "r")
     local r_hor = tonumber(string.sub(result, 1, 2))
     local r_min = tonumber(string.sub(result, 4, 5))
@@ -355,7 +301,7 @@ function get_time()
                 displayer(dialog)
                 dialog = ""
             else
-                dialog = dialog.."~"..line
+                dialog = dialog.." ~ "..line
             end
         end
         if line:find("-->", 1, true) then
